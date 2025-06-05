@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORCO.gouv.net</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.js';</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <style>
+        /* RESET ET STYLES DE BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a30, #0a0037);
+            color: #00f3ff;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 0 0 5px rgba(0, 243, 255, 0.7);
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            min-height: 85vh;
+            border-radius: 8px;
+            background: rgba(5, 5, 40, 0.95);
+            box-shadow: 0 0 25px rgba(0, 150, 255, 0.3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #00f3ff;
+            margin-bottom: 15px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            position: relative;
+            color: #008cff;
+            margin-right: 20px;
+        }
+        
+        .logo::after {
+            content: "INC";
+            font-size: 14px;
+            position: absolute;
+            top: -8px;
+            right: -30px;
+            color: #ff205d;
+            text-shadow: 0 0 10px rgba(255, 32, 93, 0.8);
+        }
+        
+        .url {
+            color: #00c3ff;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        .mode-indicator {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: linear-gradient(to right, #ff205d, #ff073a);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 0 10px rgba(255, 32, 93, 0.4);
+        }
+        
+        /* SECTION TERMINAL */
+        #terminal-screen {
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 15, 30, 0.4);
+        }
+        
+        .terminal-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 5px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .terminal-content .user {
+            color: #00c3ff;
+            font-weight: bold;
+        }
+        
+        .terminal-content .directory {
+            color: #ffcc00;
+        }
+        
+        .terminal-content .cmd {
+            color: #80ffea;
+        }
+        
+        .prompt {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .prompt-text {
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        
+        #input-line {
+            flex-grow: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: transparent;
+            border: none;
+            color: #00f3ff;
+            outline: none;
+            caret-shape: block;
+            width: 100%;
+            text-shadow: 0 0 3px rgba(0, 243, 255, 0.7);
+        }
+        
+        #input-line:focus {
+            outline: none;
+        }
+        
+        /* SECTION EXPORATEUR DE FICHIER */
+        #file-explorer {
+            display: none;
+            flex-direction: column;
+            min-height: 400px;
+            padding: 15px;
+        }
+        
+        .explorer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #00f3ff;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .path-display {
+            color: #00c3ff;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .breadcrumb span {
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .breadcrumb span:hover {
+            background: rgba(0, 150, 255, 0.2);
+        }
+        
+        .path-display i {
+            margin: 0 5px;
+        }
+        
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .file-item {
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 6px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(10, 40, 70, 0.3);
+            overflow: hidden;
+            height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .file-item:hover {
+            background: rgba(0, 100, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
+            border-color: rgba(0, 247, 255, 0.6);
+        }
+        
+        .file-item i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: #00f3ff;
+        }
+        
+        .folder-item {
+            border-color: rgba(255, 193, 7, 0.5);
+        }
+        
+        .folder-item i {
+            color: #ffcc00;
+        }
+        
+        .file-name {
+            font-size: 13px;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+        
+        .file-preview {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            display: none;
+        }
+        
+        .file-item:hover .file-preview {
+            display: block;
+        }
+        
+        /* BOUTONS ET EFFETS */
+        .btn {
+            background: linear-gradient(to right, #ff205d, #d7003a);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 30px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 32, 93, 0.5);
+            margin-top: 20px;
+            align-self: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #ff3a72, #ff0037);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 32, 93, 0.8);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 80%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .btn:hover::after {
+            opacity: 1;
+        }
+        
+        .nav-btn {
+            background: rgba(0, 100, 255, 0.3);
+            color: #00f3ff;
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            margin-left: 10px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(0, 150, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        
+        /* ANIMATIONS ET EFFETS VISUELS */
+        .terminal-line {
+            margin-bottom: 5px;
+            padding-left: 5px;
+            border-left: 1px dotted rgba(0, 243, 255, 0.3);
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 17px;
+            background-color: #00f3ff;
+            vertical-align: middle;
+            animation: blink 1s infinite;
+            box-shadow: 0 0 5px #00f3ff;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff205d;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 #006eff;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(55px, 9999px, 55px, 0); }
+            10% { clip: rect(25px, 9999px, 100px, 0); }
+            20% { clip: rect(50px, 9999px, 30px, 0); }
+            30% { clip: rect(40px, 9999px, 75px, 0); }
+            40% { clip: rect(65px, 9999px, 15px, 0); }
+            50% { clip: rect(90px, 9999px, 45px, 0); }
+            60% { clip: rect(10px, 9999px, 70px, 0); }
+            70% { clip: rect(35px, 9999px, 85px, 0); }
+            80% { clip: rect(80px, 9999px, 5px, 0); }
+            90% { clip: rect(15px, 9999px, 40px, 0); }
+            100% { clip: rect(75px, 9999px, 55px, 0); }
+        }
+        
+        @keyframes glitch-anim2 {
+            0% { clip: rect(5px, 9999px, 95px, 0); }
+            10% { clip: rect(80px, 9999px, 100px, 0); }
+            20% { clip: rect(45px, 9999px, 17px, 0); }
+            30% { clip: rect(70px, 9999px, 40px, 0); }
+            40% { clip: rect(10px, 9999px, 65px, 0); }
+            50% { clip: rect(25px, 9999px, 85px, 0); }
+            60% { clip: rect(95px, 9999px, 15px, 0); }
+            70% { clip: rect(50px, 9999px, 30px, 0); }
+            80% { clip: rect(100px, 9999px, 60px, 0); }
+            90% { clip: rect(15px, 9999px, 40px, 0); }
+            100% { clip: rect(55px, 9999px, 75px, 0); }
+        }
+        
+        .scan-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD9fX1ZAAAAB3RSTlMIIFUwPltWndztRgAAAB5JREFUSMftwTEBAAAIA6DZf2GKggQAAAAAAAAAAAAAAOC9G4eAAAGsGjoAAAAAASUVORK5CYII=');
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 9;
+        }
+        
+        /* CHARGEUR DE FICHIER */
+        .upload-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 40, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .upload-logs {
+            height: 40vh;
+            width: 90%;
+            max-width: 800px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-size: 14px;
+            padding: 15px;
+            border: 1px solid #00f3ff;
+            border-radius: 6px;
+            background: rgba(0, 20, 40, 0.7);
+        }
+        
+        .progress-container {
+            width: 80%;
+            max-width: 500px;
+            height: 20px;
+            background: rgba(0, 40, 80, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #006eff, #00d0ff);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 110, 255, 0.5);
+        }
+        
+        /* Éditeur de fichiers */
+        .file-viewer {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            background: rgba(5, 10, 30, 0.97);
+            border: 2px solid rgba(0, 150, 255, 0.5);
+            border-radius: 8px;
+            z-index: 101;
+            padding: 20px;
+            overflow: auto;
+            box-shadow: 0 0 30px rgba(0, 100, 255, 0.5);
+        }
+        
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .file-title {
+            font-size: 18px;
+            color: #00c3ff;
+        }
+        
+        .file-content {
+            padding: 15px;
+            min-height: 400px;
+        }
+        
+        .close-btn {
+            background: #ff205d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #ff3a72;
+            box-shadow: 0 0 10px rgba(255, 32, 93, 0.5);
+        }
+        
+        /* HTML Viewer */
+        .html-viewer-frame {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            background: rgba(10, 20, 40, 0.6);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+        
+        .html-viewer-frame::before {
+            content: 'Chargement de la fiche agent...';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #00f3ff;
+            font-style: italic;
+        }
+        
+        /* Markdown Viewer */
+        .markdown-content {
+            background: rgba(10, 20, 40, 0.6);
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+        
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #00f3ff;
+            border-bottom: 1px solid #0055aa;
+            padding-bottom: 10px;
+            margin: 20px 0 15px 0;
+        }
+        
+        .markdown-content p {
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+        
+        .markdown-content code {
+            background: rgba(0, 30, 60, 0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .markdown-content pre {
+            background: rgba(0, 20, 40, 0.8);
+            padding: 15px;
+            border-radius: 6px;
+            overflow: auto;
+            border: 1px solid rgba(0, 100, 255, 0.2);
+        }
+        
+        .markdown-content img {
+            max-width: 100%;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0, 120, 255, 0.2);
+            margin: 15px 0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                min-height: 90vh;
+                padding: 15px;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .url {
+                margin-top: 10px;
+            }
+            
+            .mode-indicator {
+                position: static;
+                margin-top: 10px;
+                align-self: flex-end;
+            }
+            
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            
+            .file-item {
+                height: 110px;
+                padding: 10px 5px;
+            }
+            
+            .file-item i {
+                font-size: 30px;
+            }
+            
+            .file-name {
+                font-size: 11px;
+            }
+            
+            .explorer-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .breadcrumb-container {
+                margin-top: 10px;
+            }
+            
+            #terminal-screen {
+                padding: 10px;
+            }
+            
+            .upload-logs {
+                height: 50vh;
+                font-size: 13px;
+            }
+            
+            .file-viewer {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            
+            .file-item {
+                height: 100px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+        .music-player-simple {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(5, 10, 30, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            border-radius: 30px;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1100;
+            backdrop-filter: blur(3px);
+            box-shadow: 0 0 15px rgba(0, 100, 255, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .player-btn {
+            background: transparent;
+            border: none;
+            color: #00f3ff;
+            cursor: pointer;
+            font-size: 14px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .player-btn:hover {
+            color: white;
+            background: rgba(0, 200, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .volume-control {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .volume-btn:hover + .volume-slider {
+            display: block;
+        }
+        
+        .volume-slider:hover {
+            display: block;
+        }
+        
+        .volume-slider {
+            position: absolute;
+            bottom: 35px;
+            right: 0;
+            height: 80px;
+            background: rgba(5, 10, 30, 0.9);
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+        }
+        
+        #volume {
+            height: 65px;
+            width: 8px;
+            -webkit-appearance: slider-vertical;
+            writing-mode: bt-lr;
+            transform: rotate(0deg);
+        }
+        
+        .track-title {
+            font-size: 11px;
+            color: #00f3ff;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 150px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Partie Terminal -->
+        <div id="terminal-container">
+            <header>
+                <div class="logo" id="logo">ORCO</div>
+                <div class="url">ORCO.gouv.net</div>
+                <div class="mode-indicator">INTERVENEUR.CONFIDENTIELLE</div>
+            </header>
+            
+            <div id="terminal-screen">
+                <div id="terminal-content" class="terminal-content"></div>
+                <div class="prompt">
+                    <span class="prompt-text"><span class="user">hack3r</span><span class="directory">@orco-server</span><span>:$ </span></span>
+                    <span id="cursor" class="cursor"></span>
+                </div>
+            </div>
+            
+            <div id="hack-container" style="display:none;">
+                <button id="hack-btn" class="btn">Accéder au système</button>
+            </div>
+        </div>
+        
+        <!-- Partie Upload -->
+        <div class="upload-animation" id="upload-animation">
+            <h3 class="glitch" data-text="TÉLÉCHARGEMENT DU PACKAGE MALVEILLANT">TÉLÉCHARGEMENT DU PACKAGE MALVEILLANT</h3>
+            <div class="upload-logs" id="upload-logs">
+                <div>⏳ Initialisation du protocole d'intrusion OR-7...</div>
+            </div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+        
+        <!-- Partie Explorateur de Fichiers -->
+        <div id="file-explorer">
+            <div class="explorer-header">
+                <div class="path-display">
+                    <i class="fas fa-server"></i> ORCO_RACINE &gt; 
+                    <div class="breadcrumb-container"><span id="current-folder">fichiers_confidentiels</span></div>
+                </div>
+                <div>
+                    <span class="status-indicator">ACCÈS ROOT</span>
+                    <button id="root-btn" class="nav-btn"><i class="fas fa-home"></i> Racine</button>
+                </div>
+            </div>
+            
+            <div class="files-grid" id="files-grid">
+                <!-- Les dossiers et fichiers seront générés par JavaScript -->
+            </div>
+            
+            <button id="reset-btn" class="btn">Réinitialiser le système</button>
+        </div>
+        
+        <!-- Éditeur de fichiers -->
+        <div class="file-viewer" id="file-viewer">
+            <div class="file-header">
+                <div class="file-title" id="file-title"></div>
+                <button class="close-btn" id="close-viewer">Fermer [X]</button>
+            </div>
+            <div class="file-content" id="file-content"></div>
+        </div>
+        
+        <!-- Effets Visuels -->
+        <div class="scan-lines"></div>
+        <div class="noise"></div>
+    </div>
+    <div class="music-player-simple" id="music-player">
+        <button class="player-btn" id="play-pause-btn">
+            <i class="fas fa-play"></i>
+        </button>
+        
+        <div class="track-title" id="track-title">Thème ORCO</div>
+        
+        <div class="volume-control">
+            <button class="player-btn volume-btn" id="volume-btn">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <div class="volume-slider">
+                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5" orient="vertical">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Structure de fichiers hiérarchique avec chemins et types
+        const fileSystem = {
+            name: "root",
+            type: "folder",
+            path: "/",
+            items: [
+                {
+                    name: "dossiers_personnel",
+                    type: "folder",
+                    icon: "fas fa-users",
+                    items: [
+                        { 
+                            name: "Liam", 
+                            type: "html", 
+                            icon: "fas fa-file-code",
+                            path: "assets/file/html/Liam/index.html" 
+                        },
+                        { 
+                            name: "Mary", 
+                            type: "html", 
+                            icon: "fas fa-file-code", 
+                            path: "assets/file/html/Mary/index.html" 
+                        },
+                        { 
+                            name: "Aaron", 
+                            type: "html", 
+                            icon: "fas fa-file-code", 
+                            path: "assets/file/html/Aaron/index.html" 
+                        },
+                        { 
+                            name: "Kyle", 
+                            type: "html", 
+                            icon: "fas fa-file-code", 
+                            path: "assets/file/html/Kyle/index.html" 
+                        }
+                    ]
+                },
+                {
+                    name: "rapports_operations",
+                    type: "folder",
+                    icon: "fas fa-folder",
+                    items: [
+                        { 
+                            name: "operation_citadelle", 
+                            type: "md", 
+                            icon: "fas fa-file-alt",
+                            content: "### OPÉRATION CITADELLE\n\n**Objectif**: Neutraliser le réseau de piratage Citadelle\n\n**Statut**: SUCCÈS\n\n**Date**: 15/08/2023\n\n**Agents**: Liam, Mary\n\n**Description détaillée**:\nL'opération Citadelle a été lancée pour contrer une série d'attaques contre les infrastructures bancaires nationales. \n\n![Illustration](/assets/op_citadelle.jpg)\n\nAprès plusieurs mois d'investigation, l'équipe ORCO a pu infiltrer et désactiver les serveurs de Citadelle.\n\n```chronologie\n- Jour 1: Infiltration réseau\n- Jour 4: Collecte preuves\n- Jour 15: Intervention et neutralisation\n```\n\n**Résultat**: 5 membres du réseau arrêtés",
+                            path: "assets/operation_citadelle.md",
+                            images: []
+                        },
+                        { 
+                            name: "operation_tsunami", 
+                            type: "md", 
+                            icon: "fas fa-file-alt",
+                            content: "### OPÉRATION TSUNAMI\n\n**Objectif**: Perturber trafic de contrefaçon\n\n**Statut**: EN COURS\n\n**Date**: 01/09/2023\n\n**Agents**: Aaron, Kyle\n\n**Dernière mise à jour**:\nNotre équipe est actuellement en mission d'infiltration dans la filière de contrefaçon mondial.\n\n![Diagramme](/assets/tsunami_diag.png)\n\n**Prochaines étapes**:\n- Suivi des livraisons porte Sud\n- Identification des fournisseurs\n- Opération encerclante prévue le Samedi",
+                            path: "assets/operation_tsunami.md",
+                            images: []
+                        },
+                        { 
+                            name: "plan_cobalt", 
+                            type: "md", 
+                            icon: "fas fa-file-alt",
+                            content: "### PLAN COBALT\n\n**Objectif**: Secret défense MAXIMUM\n\n**Accès restreint**: Niveau 5 uniquement\n\n**Description**:\nLe plan Cobalt est une stratégie de contre-espionnage à long terme impliquant plusieurs agents dormants dans des organisations criminelles internationales.\n\n```\nALERTE: Ce document ne doit pas être copié ou transmis\n```\n\n**Éléments clés**:\n- Double agent à Shanghaï\n- Surveillance des communications satellites\n- Protection des données sensibles",
+                            path: "assets/plan_cobalt.md",
+                            images: []
+                        },
+                        { 
+                            name: "operation_blackout", 
+                            type: "md", 
+                            icon: "fas fa-file-alt",
+                            content: "### BLACKOUT PROTOCOL\n\n**Procédure d'urgence en cas de brèche majeure**\n\n**Dernière mise à jour**: 12/07/2023\n\n**Protocole commence**\n\n1. Isoler les serveurs principaux\n2. Déployer les défenses cryptographiques\n3. Alerter tous les agents\n4. Détruire documents sensibles\n5. Évacuer le bâtiment selon\n\n**Critères d'activation**:\n- Détection d'intrusion niveau 9 ou plus\n- Perte de données potentielle\n- Menace physique sur le site",                           
+                            path: "assets/operation_blackout.md",
+                            images: []
+                        }
+                    ]
+                },
+                { 
+                    name: "protocoles_urgence", 
+                    type: "file", 
+                    icon: "fas fa-file-exclamation",
+                    content: "PROTOCOLES D'URGENCE\nEn cas d'intrusion:\n1. Activer le protocole FIREWALL\n2. Déconnecter les serveurs principaux\n3. Effacer les journaux systèmes\n4. Contacter l'équipe CYPHER"
+                },
+                { 
+                    name: "sysadmin.log", 
+                    type: "file", 
+                    icon: "fas fa-file-code",
+                    content: "SYSTEM LOG - 15/09/2023\n[WARNING] Tentative d'intrusion détectée - IP: 192.168.7.45\n[ACTION] Défense activée - Protocole BLUE SHIELD\n[STATUS] Système sécurisé"
+                },
+            ]
+        };
+
+        // Variables DOM
+        const terminalContent = document.getElementById('terminal-content');
+        const cursor = document.getElementById('cursor');
+        const hackBtn = document.getElementById('hack-btn');
+        const fileExplorer = document.getElementById('file-explorer');
+        const filesGrid = document.getElementById('files-grid');
+        const uploadAnimation = document.getElementById('upload-animation');
+        const uploadLogs = document.getElementById('upload-logs');
+        const progressBar = document.getElementById('progress-bar');
+        const logo = document.getElementById('logo');
+        const modeIndicator = document.querySelector('.mode-indicator');
+        const hackContainer = document.getElementById('hack-container');
+        const backBtn = document.getElementById('back-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const rootBtn = document.getElementById('root-btn');
+        const currentFolder = document.getElementById('current-folder');
+        const fileViewer = document.getElementById('file-viewer');
+        const fileTitle = document.getElementById('file-title');
+        const fileContent = document.getElementById('file-content');
+        const closeViewer = document.getElementById('close-viewer');
+        
+        // Navigation dans les dossiers & variables PDF
+        let currentPath = [fileSystem];
+        let currentPDF = {
+            doc: null,
+            pageNumber: 1,
+            pageCount: 0
+        };
+        
+        // Fonctions d'affichage
+        function typeText(element, text, speed, callback) {
+            let i = 0;
+            const interval = setInterval(() => {
+                element.innerHTML += text.charAt(i);
+                element.scrollTop = element.scrollHeight;
+                i++;
+                if (i >= text.length) {
+                    clearInterval(interval);
+                    if (callback) setTimeout(callback, 500);
+                }
+            }, speed);
+        }
+        
+        function addLine(line) {
+            const p = document.createElement('p');
+            p.className = 'terminal-line';
+            terminalContent.appendChild(p);
+            return p;
+        }
+        
+        function createTerminalSequence() {
+            // Animation initiale
+            terminalContent.innerHTML = '';
+            const line1 = addLine();
+            typeText(line1, "Connexion établie à ORCO.gouv.net...", 30, () => {
+                setTimeout(() => {
+                    const line2 = addLine();
+                    typeText(line2, "Authentification du système...", 30, () => {
+                        setTimeout(() => {
+                            const line3 = addLine();
+                            typeText(line3, "Accès autorisé. Bienvenue sur le portail réservé.", 20, () => {
+                                // Ajouter des logs de sécurité
+                                setTimeout(() => {
+                                    addLine().innerHTML = "<span class='directory'>[SYS]</span> Dernier accès: 08/09/2023 13:45:11 GMT";
+                                    addLine().innerHTML = "<span class='directory'>[ALERTE_SECURITE]</span> Activités suspectes détectées";
+                                    addLine().innerHTML = "<span class='directory'>[SECURITE]</span> Lancement du protocole de vérification";
+                                    setTimeout(() => {
+                                        // Effet de glitch sur le logo
+                                        logo.classList.add('glitch');
+                                        logo.dataset.text = "ORCO";
+                                        modeIndicator.style.opacity = 1;
+                                        
+                                        // Texte d'avertissement
+                                        addLine().innerHTML = "<span class='cmd'>ERR : Intrusion détectée depuis l'adresse 192.168.7.45</span>";
+                                        addLine().innerHTML = "<span class='cmd'>Initialisation du protocole de défense : BLUE SHIELD</span>";
+                                        
+                                        // Afficher le bouton après un délai
+                                        setTimeout(() => {
+                                            document.querySelector('.prompt').style.display = 'none';
+                                            hackContainer.style.display = 'block';
+                                            addLine().innerHTML = "<span class='cmd'><i class='fas fa-arrow-circle-right'></i> Système compromis. Accès root imminent...</span>";
+                                        }, 2000);
+                                    }, 1000);
+                                }, 500);
+                            });
+                        }, 500);
+                    });
+                }, 500);
+            });
+        }
+        
+        // Simulation de chargement de fichier
+        function simulateFileUpload() {
+            // Cacher le terminal, afficher l'animation d'upload
+            document.getElementById('terminal-container').style.display = 'none';
+            uploadAnimation.style.display = 'flex';
+            
+            // Logs de piratage
+            const hackMessages = [
+                "⏳ Recherche de vulnérabilités dans les systèmes ORCO...",
+                "✅ Exploitation de la faille CVE-2023-OR7",
+                "📦 Déploiement du package malveillant: 'ShadowBreak'...",
+                "🔐 Désactivation des protocoles de sécurité...",
+                "✅ Protocole BLUE SHIELD contourné avec succès",
+                "⚙️ Modification des privilèges système...",
+                "🔒 Bypass de l'authentification multifacteur...",
+                "🔑 Capture de jetons d'accès administrateur",
+                "🚀 Téléchargement des dossiers confidentiels...",
+                "📀 Préparation de l'accès au système...",
+                "🔌 Connexion à la base de données principale..."
+            ];
+            
+            let logCounter = 1;
+            let progress = 0;
+            
+            const logInterval = setInterval(() => {
+                if (logCounter < hackMessages.length) {
+                    const logEntry = document.createElement('div');
+                    logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${hackMessages[logCounter]}`;
+                    uploadLogs.appendChild(logEntry);
+                    uploadLogs.scrollTop = uploadLogs.scrollHeight;
+                    logCounter++;
+                    
+                    // Update progress bar
+                    progress = Math.min(progress + (100 / (hackMessages.length + 2)), 100);
+                    progressBar.style.width = `${progress}%`;
+                } else {
+                    clearInterval(logInterval);
+                    
+                    // Final steps
+                    setTimeout(() => {
+                        const logEntry = document.createElement('div');
+                        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ✅ Intrusion réussie. Accès root obtenu`;
+                        uploadLogs.appendChild(logEntry);
+                        uploadLogs.scrollTop = uploadLogs.scrollHeight;
+                        
+                        progress = 100;
+                        progressBar.style.width = `${progress}%`;
+                        
+                        setTimeout(showFileExplorer, 1500);
+                    }, 800);
+                }
+            }, 800);
+        }
+        
+        // Mise à jour de la navigation
+        function updateBreadcrumbs() {
+            breadcrumbs = document.querySelector('.breadcrumb-container');
+            breadcrumbs.innerHTML = '';
+            
+            // Créer les liens de navigation
+            for (let i = 0; i < currentPath.length; i++) {
+                const crumb = document.createElement('span');
+                crumb.textContent = currentPath[i].name;
+                if (i === currentPath.length - 1) {
+                    crumb.style.fontWeight = 'bold';
+                    crumb.style.color = '#00f3ff';
+                } else {
+                    crumb.addEventListener('click', () => navigateToFolder(i));
+                }
+                breadcrumbs.appendChild(crumb);
+                if (i < currentPath.length - 1) {
+                    breadcrumbs.innerHTML += '<i class="fas fa-chevron-right" style="margin: 0 5px;"></i>';
+                }
+            }
+        }
+        
+        // Naviguer vers un dossier spécifique dans la hiérarchie
+        function navigateToFolder(level) {
+            if (level >= 0 && level < currentPath.length) {
+                currentPath = currentPath.slice(0, level + 1);
+                renderFolderContent(currentPath[currentPath.length - 1]);
+                updateBreadcrumbs();
+            }
+        }
+        
+        // Afficher le contenu d'un dossier
+        function renderFolderContent(folder) {
+            filesGrid.innerHTML = '';
+            currentFolder.textContent = folder.name;
+            
+            // Affichage des sous-éléments
+            (folder.items || []).forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = `file-item ${item.type === 'folder' ? 'folder-item' : ''}`;
+                itemElement.innerHTML = `
+                    <i class="${item.icon}"></i>
+                    <div class="file-name">${item.name}</div>
+                    ${item.type === 'html' ? '<div class="file-preview">HTML</div>' : ''}
+                    ${item.type === 'md' ? '<div class="file-preview">MARKDOWN</div>' : ''}
+                `;
+                
+                // Gestion du clic
+                itemElement.addEventListener('click', () => {
+                    if (item.type === 'folder') {
+                        currentPath.push(item);
+                        renderFolderContent(item);
+                        updateBreadcrumbs();
+                    } else {
+                        showFileContent(item);
+                    }
+                });
+                
+                filesGrid.appendChild(itemElement);
+            });
+        }
+        
+        // Afficher le contenu d'un fichier
+        function showFileContent(item) {
+            fileViewer.style.display = 'block';
+            fileTitle.textContent = `${item.name}`;
+            
+             // Création du contenu selon le type
+            if (item.type === 'html') {
+                showHTML(item);
+            } else if (item.type === 'md') {
+                renderMarkdown(item.content);
+            } else {
+                // Texte simple
+                fileContent.innerHTML = `<pre style="background: rgba(10, 20, 40, 0.7); padding: 15px; border-radius: 6px; white-space: pre-wrap;">${item.content}</pre>`;
+            }
+        }
+        
+        // Afficher le HTML des agents
+        function showHTML(item) {
+            fileContent.innerHTML = `
+                <iframe src="${item.path}" class="html-viewer-frame"></iframe>
+            `;
+        }
+        // Afficher le PDF
+        function showPDF(url) {
+            fileContent.innerHTML = `
+                <div class="pdf-viewer">
+                    <div class="pdf-controls">
+                        <button class="pdf-btn" id="prev-page"><i class="fas fa-arrow-left"></i> Prev</button>
+                        <button class="pdf-btn" id="next-page">Next <i class="fas fa-arrow-right"></i></button>
+                        <span class="page-counter">Page <span id="page-num"></span> of <span id="page-count"></span></span>
+                        <button class="pdf-btn" id="zoom-in">Zoom In +</button>
+                        <button class="pdf-btn" id="zoom-out">Zoom Out -</button>
+                    </div>
+                    <canvas id="pdf-canvas"></canvas>
+                </div>
+            `;
+            
+            // Rendering Code
+            let pageNum = 1;
+            let pageRendering = false;
+            let pageNumPending = null;
+            const canvas = document.getElementById('pdf-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let PDFDoc = null;
+            const Scale = 1.4;
+            
+            // Chargement du PDF
+            pdfjsLib.getDocument(url).promise.then(pdf => {
+                PDFDoc = pdf;
+                document.getElementById('page-count').textContent = pdf.numPages;
+                renderPage(pageNum);
+            });
+            
+            // Render page function
+            function renderPage(num) {
+                pageRendering = true;
+                
+                PDFDoc.getPage(num).then(page => {
+                    const viewport = page.getViewport({ scale: Scale });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport
+                    };
+                    
+                    page.render(renderContext).promise.then(() => {
+                        pageRendering = false;
+                        document.getElementById('page-num').textContent = num;
+                        
+                        if (pageNumPending !== null) {
+                            renderPage(pageNumPending);
+                            pageNumPending = null;
+                        }
+                    });
+                });
+            }
+            
+            // Navigation pagination
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (pageNum <= 1) return;
+                pageNum--;
+                queueRenderPage(pageNum);
+            });
+            
+            document.getElementById('next-page').addEventListener('click', () => {
+                if (pageNum >= PDFDoc.numPages) return;
+                pageNum++;
+                queueRenderPage(pageNum);
+            });
+            
+            function queueRenderPage(num) {
+                if (pageRendering) {
+                    pageNumPending = num;
+                } else {
+                    renderPage(num);
+                }
+            }
+            
+            // Zoom
+            let scale = Scale;
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                scale *= 1.2;
+                renderPage(pageNum);
+            });
+            
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                if (scale > 0.5) {
+                    scale *= 0.8;
+                    renderPage(pageNum);
+                }
+            });
+        }
+        
+        // Render Markdown
+        function renderMarkdown(content) {
+            // Utilisation de marked pour convertir en HTML
+            const htmlContent = marked.parse(content);
+            fileContent.innerHTML = `
+                <div class="markdown-content">
+                    ${htmlContent}
+                </div>
+            `;
+            
+            // Ajouter du style supplémentaire si nécessaire
+            hljs.highlightAll();
+        }
+        
+        // Afficher l'explorateur de fichiers
+        function showFileExplorer() {
+            uploadAnimation.style.display = 'none';
+            fileExplorer.style.display = 'flex';
+            
+            // Réinitialiser le chemin
+            currentPath = [fileSystem];
+            updateBreadcrumbs();
+            renderFolderContent(fileSystem);
+        }
+        
+        // Réinitialiser l'application
+        function resetApp() {
+            // Réinitialiser l'interface
+            terminalContent.innerHTML = '';
+            fileExplorer.style.display = 'none';
+            document.querySelector('.prompt').style.display = 'flex';
+            hackContainer.style.display = 'none';
+            document.getElementById('terminal-container').style.display = 'block';
+            logo.classList.remove('glitch');
+            modeIndicator.style.opacity = 0;
+            cursor.style.display = 'inline-block';
+            
+            // Réactivation des animations
+            createTerminalSequence();
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialisation du terminal
+            createTerminalSequence();
+            
+            // Gestion des événements
+            hackBtn.addEventListener('click', () => {
+                cursor.style.display = 'none';
+                simulateFileUpload();
+            });
+            
+            resetBtn.addEventListener('click', resetApp);
+            
+            // Fermer le visualiseur de fichiers
+            closeViewer.addEventListener('click', () => {
+                fileViewer.style.display = 'none';
+            });
+            
+            // Bouton "Racine"
+            rootBtn.addEventListener('click', () => {
+                currentPath = [fileSystem];
+                renderFolderContent(fileSystem);
+                updateBreadcrumbs();
+            });
+            
+            // Effet de scan aléatoire du terminal
+            setInterval(() => {
+                if (document.getElementById('terminal-container').style.display !== 'none') {
+                    const randomLines = Math.floor(Math.random() * 2) + 1;
+                    for (let i = 0; i < randomLines; i++) {
+                        const line = addLine();
+                        line.innerHTML = 
+                            `<span class="directory">[SYS]</span> ${getRandomHex(24)}`;
+                    }
+                    terminalContent.scrollTop = terminalContent.scrollHeight;
+                }
+            }, 10000);
+        });
+        
+        // Générateur hexadécimal pour les logs système
+        function getRandomHex(size) {
+            const characters = "0123456789ABCDEF";
+            let result = "";
+            for (let i = 0; i < size; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+         // LECTEUR DE MUSIQUE SIMPLIFIÉ
+        const audioPlayer = document.createElement('audio');
+        document.body.appendChild(audioPlayer);
+        
+        // Composition musicale initiale
+        audioPlayer.loop = true;
+        
+        // Topologie musicale et flux
+        try {
+            audioPlayer.src = "assets/music/orco_theme.mp3";
+        } catch(e) {
+            console.error("Modalité musicale indisponible");
+        }
+        
+        // Contrôles d'interface
+        let isPlaying = false;
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        
+        // Initialisation du lecteur
+        window.addEventListener('load', function() {
+            // Gestion du bouton lecture/pause
+            playPauseBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    audioPlayer.pause();
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                } else {
+                    audioPlayer.play();
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                }
+                isPlaying = !isPlaying;
+            });
+            
+            // Contrôle du volume
+            document.getElementById('volume').addEventListener('input', function() {
+                audioPlayer.volume = this.value;
+                const volumeBtn = document.getElementById('volume-btn');
+                if (this.value == 0) {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                } else if (this.value < 0.5) {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+                } else {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }
+            });
+            
+            // Contrôle du niveau de volume par défaut
+            document.getElementById('volume').value = 0.5;
+            audioPlayer.volume = 0.5;
+        });
+    </script>
+</body>
+</html>

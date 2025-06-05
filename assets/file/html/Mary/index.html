@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Présentation Agent Spécial - Section ORCO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --primary: #35a7ff;
+            --secondary: #ff4d94;
+            --accent: #8c52ff;
+            --yellow: #f9c22e;
+            --background: #0d1117;
+            --panel: #1a1f29;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #0a0f1a, #05080f);
+            font-family: 'Share Tech Mono', monospace;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        
+        .agent-card {
+            width: 100%;
+            max-width: 1000px;
+            background: linear-gradient(135deg, #0a0e17, #151a24);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            box-shadow: 
+                0 0 45px rgba(53, 167, 255, 0.2), 
+                0 0 10px rgba(140, 82, 255, 0.1) inset;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .watermark {
+            position: absolute;
+            font-size: 150px;
+            opacity: 0.03;
+            transform: rotate(-45deg);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            white-space: nowrap;
+            color: var(--primary);
+            top: 35%;
+            left: -100px;
+            width: calc(100% + 200px);
+            text-align: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .watermark.secondary {
+            top: 65%;
+            color: var(--accent);
+        }
+        
+        .header {
+            padding: 30px 40px 25px;
+            text-align: center;
+            border-bottom: 1px solid var(--primary);
+            background: rgba(10, 21, 37, 0.8);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .agency-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(53, 167, 255, 0.6);
+        }
+        
+        .agent-title {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #1a1f29, #0a0e17);
+            border: 1px solid var(--secondary);
+            border-radius: 4px;
+            padding: 8px 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 30px;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .section {
+            background: rgba(10, 21, 37, 0.5);
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--secondary), transparent);
+            margin-left: 10px;
+        }
+        
+ .bio-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Image à gauche, infos à droite */
+    gap: 20px;
+    align-items: start; /* Aligner les éléments en haut */
+}
+        
+        .bio-item {
+            margin-bottom: 15px;
+        }
+        
+        .bio-label {
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .bio-value {
+            font-size: 16px;
+            color: #fff;
+        }
+        
+        .enhancements {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .enhancement-item {
+            background: rgba(53, 167, 255, 0.15);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .enhancement-item:hover {
+            transform: translateY(-3px);
+            background: rgba(53, 167, 255, 0.25);
+            border-color: var(--accent);
+        }
+        
+        .talents-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .talent-card {
+            background: linear-gradient(to bottom right, #161f2d, #0d1522);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .talent-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+        }
+        
+        .talent-name {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--yellow);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .talent-rating {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .talent-rating-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            border-radius: 3px;
+        }
+        
+        .photo-section {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .agent-photo {
+            height: auto;
+            background: linear-gradient(to bottom right, #1a2a4a, #152238);
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0px;
+            position: relative;
+            overflow: hidden;
+            
+        }
+        
+        .photo-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: #7e8a9a;
+            font-size: 18px;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.2), rgba(21, 34, 56, 0.3));
+        }
+        
+        .photo-placeholder svg {
+            width: 60px;
+            height: 60px;
+            fill: var(--primary);
+            filter: drop-shadow(0 0 5px rgba(53, 167, 255, 0.5));
+        }
+        
+        .personal-details {
+            background: rgba(10, 21, 37, 0.5);
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-box {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed rgba(53, 167, 255, 0.3);
+        }
+        
+        .stat-box:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-name {
+            color: #7e8a9a;
+        }
+        
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--yellow);
+            font-size: 20px;
+        }
+        
+        .analysis {
+            background: rgba(27, 32, 41, 0.8);
+            border-left: 3px solid var(--yellow);
+            padding: 25px;
+            border-radius: 0 6px 6px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.8;
+        }
+        
+        .analysis-report {
+            margin-bottom: 20px;
+        }
+        
+        .analysis-header {
+            color: var(--yellow);
+            margin-bottom: 10px;
+        }
+        
+        .notice {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .notice::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px;
+            border-top: 1px solid var(--primary);
+            color: #7e8a9a;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .agent-photo {
+                height: auto;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .header {
+                padding: 20px 20px 15px;
+            }
+            
+            .bio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="agent-card">
+        <span class="watermark">AGENT SPECTRE-7</span>
+        <span class="watermark secondary">CONFIDENTIEL NIVEAU 5</span>
+        
+        <div class="header">
+            <div class="agency-title">SECTION ORCO</div>
+            <h1 class="agent-title">FICHE D'IDENTIFICATION: MARY ORCO</h1>
+            <div class="badge">CLASSÉ: CONFIDENTIEL NIVEAU 5</div>
+        </div>
+        
+        <div class="content">
+            <div class="profile-section">
+                <div class="section">
+                    <h2 class="section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4d94" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        IDENTIFICATION PRIMAIRE
+                    </h2>
+                    
+<div class="bio-grid">
+    <!-- Colonne 1 : photo -->
+    <div class="photo-placeholder">
+        <img src="img/00049-95447243.png" width="200" alt="Photo de l'agent">
+    </div>
+
+    <!-- Colonne 2 : infos -->
+    <div class="bio-infos">
+        <div class="bio-item">
+            <div class="bio-label">NOM DE CODE</div>
+            <div class="bio-value">OR-2</div>
+        </div>
+
+        <div class="bio-item">
+            <div class="bio-label">IDENTITÉ CIVILE</div>
+            <div class="bio-value">Mary ORCO</div>
+        </div>
+
+        <div class="bio-item">
+            <div class="bio-label">MATRICULE</div>
+            <div class="bio-value">OR-2203-STNG</div>
+        </div>
+
+        <div class="bio-item">
+            <div class="bio-label">SPÉCIALISATION</div>
+            <div class="bio-value">FORCE HERCULÉENNE</div>
+        </div>
+    </div>
+</div>
+
+                    
+                </div>
+                
+                <div class="section">
+                    <h2 class="section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f9c22e" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                        </svg>
+                        TALENTS & APTITUDES
+                    </h2>
+                    
+                    <div class="talents-container">
+                        <div class="talent-card">
+                            <div class="talent-name">Combat</div>
+                            <div>• Force surnaturels</div><br>
+                            <div>• Maîtrise des fouets</div><br>
+                            <div>• Résistance mentale</div><br>
+                            <div>• Présence apaisante</div>
+                        </div>  
+                        <div class="talent-card">
+                            <div class="talent-name">Force Herculéenne</div>
+                            <div>• Possède une force physique capable de porter un poids de plus de 30,000 kg</div>
+                            <div></div>
+                        </div>  
+                    </div>
+                </div>
+                            <div class="photo-section">
+                <div class="agent-photo">
+                    <div class="photo-placeholder">
+                                <img src="img/00018-2733252406.png" width="100%" >
+                    </div>
+                </div>
+            </div>
+                <div class="analysis">
+                    <h2 class="analysis-header">ANALYSE COMPORTEMENTALE // ID: OR-1</h2>
+                    
+                    <div class="analysis-report">
+    <strong>TRAITS DOMINANTS:</strong> Force physique inégalée, calme olympien, posture inébranlable. Endurance et puissance hors norme.<br>
+    <div class="notice">Capacité de levage estimée: 30,000 kg</div>
+    <div class="notice">Stabilité émotionnelle en situation extrême: Exceptionnelle</div>
+</div>
+
+<div class="analysis-report">
+    <strong>RISQUES DÉTECTÉS:</strong> Manque d’initiative individuelle, attend ordres directs.
+    <div class="notice">Réaction lente hors contexte de commandement clair</div>
+    <div class="notice">Tendance à ne pas savoir gérer sa force naturellement</div>
+</div>
+
+<div class="analysis-report">
+    <strong>RECOMMANDATION:</strong>
+    <div class="notice">Intégration à une cellule tactique en tant que pilier défensif</div>
+    <div class="notice">Encourager initiative et décision personnelle</div>
+</div>
+<div class="analysis-report">
+    <strong>NOTES:</strong>
+    <div class="notice">Devenu une star populaire en tant que mannequin et Idole ayant atteint un grand nombre de Followers</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="photo-section">
+                <div class="agent-photo">
+                    <div class="photo-placeholder">
+                                <img src="img/00048-95447243.png" width="100%" >
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            DOCUMENT CLASSIFIÉ - PROPRIÉTÉ SECTION ORCO.INC<br>
+            ACCÈS AUTORISÉ UNIQUEMENT NIVEAU DELTA ET SUPÉRIEUR<br>
+            Système ORCOS - V3.14 - ENREGISTRÉ: <span id="current-date"></span>
+        </div>
+    </div>
+
+    <script>
+        // Update current date
+        const now = new Date();
+        const formattedDate = [now.getDate().toString().padStart(2, '0'), 
+                         (now.getMonth()+1).toString().padStart(2, '0'), 
+                         now.getFullYear()].join('.');
+        document.getElementById('current-date').textContent = formattedDate;
+    </script>
+</body>
+</html>
