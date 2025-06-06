@@ -681,12 +681,13 @@
         /* HTML Viewer */
         .html-viewer-frame {
             width: 100%;
-            height: 80vh;
+            height: 100%;
             border: none;
             background: rgba(10, 20, 40, 0.6);
             border-radius: 6px;
             overflow: hidden;
             border: 1px solid rgba(0, 150, 255, 0.2);
+}
         }
         
         .html-viewer-frame::before {
@@ -740,7 +741,23 @@
             box-shadow: 0 0 10px rgba(0, 120, 255, 0.2);
             margin: 15px 0;
         }
-        
+        .responsive-iframe-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* Ratio 16:9 */
+  height: 0;
+  overflow: hidden;
+}
+
+.responsive-iframe-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
         /* Responsive design */
         @media (max-width: 768px) {
             .container {
@@ -1304,11 +1321,14 @@
         }
         
         // Afficher le HTML des agents
-        function showHTML(item) {
-            fileContent.innerHTML = `
-                <iframe src="${item.path}" class="html-viewer-frame"></iframe>
-            `;
-        }
+function showHTML(item) {
+    fileContent.innerHTML = `
+        <div class="responsive-iframe-container">
+            <iframe src="${item.path}" class="html-viewer-frame" allowfullscreen></iframe>
+        </div>
+    `;
+}
+
         // Afficher le PDF
         function showPDF(url) {
             fileContent.innerHTML = `
